@@ -144,12 +144,24 @@ IfStatement::IfStatement(TokenScanner &scanner) {
         if (depth == 0 && tok == "THEN") break;
         rhsT.push_back(tok);
     }
-    std::string tline = scanner.nextToken();
-    if (tline.empty() || scanner.getTokenType(tline) != NUMBER) error("SYNTAX ERROR");
-    if (scanner.hasMoreTokens()) error("SYNTAX ERROR");
-    lhs_ = parseExpFromTokens(lhsT);
-    rhs_ = parseExpFromTokens(rhsT);
-    target_ = stringToInteger(tline);
+
+    // Parse expressions with exception safety
+    Expression *L = nullptr;
+    Expression *R = nullptr;
+    try {
+        L = parseExpFromTokens(lhsT);
+        R = parseExpFromTokens(rhsT);
+        std::string tline = scanner.nextToken();
+        if (tline.empty() || scanner.getTokenType(tline) != NUMBER) {
+            delete L; delete R; error("SYNTAX ERROR");
+        }
+        if (scanner.hasMoreTokens()) { delete L; delete R; error("SYNTAX ERROR"); }
+        lhs_ = L;
+        rhs_ = R;
+        target_ = stringToInteger(tline);
+    } catch (...) {
+        delete L; delete R; throw;
+    }
 }
 IfStatement::~IfStatement() {
     delete lhs_;
