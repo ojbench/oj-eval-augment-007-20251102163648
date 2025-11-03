@@ -31,6 +31,7 @@ int main() {
             if (input.empty()) continue;
             processLine(input, program, state);
         } catch (ErrorException &ex) {
+            if (ex.getMessage() == "QUIT") break;
             std::cout << ex.getMessage() << std::endl;
         }
     }
@@ -131,7 +132,7 @@ void processLine(std::string line, Program &program, EvalState &state) {
         return;
     } else if (first == "QUIT") {
         if (scanner.hasMoreTokens()) error("SYNTAX ERROR");
-        std::exit(0);
+        error("QUIT");
     }
 
     // Immediate executable statements: LET / PRINT / INPUT
