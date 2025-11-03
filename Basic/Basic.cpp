@@ -137,6 +137,11 @@ void processLine(std::string line, Program &program, EvalState &state) {
 
     // Immediate executable statements: LET / PRINT / INPUT
     Statement *stmt = parseStatementImmediate(first, scanner);
-    stmt->execute(state, program);
+    try {
+        stmt->execute(state, program);
+    } catch (...) {
+        delete stmt;
+        throw;
+    }
     delete stmt;
 }
